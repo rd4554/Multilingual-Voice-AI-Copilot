@@ -154,21 +154,6 @@ The application will open in your browser automatically.
 
 ---
 
-## 📸 Screenshots
-
-### Main Interface
-
-_Add screenshot here_
-
-### Voice Input
-
-_Add screenshot here_
-
-### Chat Management
-
-_Add screenshot here_
-
----
 
 ## 🔮 Future Improvements
 
@@ -197,6 +182,3 @@ This project demonstrates:
 
 ## 👨‍💻 Reecha
 
-Built as a personal AI and speech technology project using modern open-source tools.
-
-If you found this project useful, feel free to star ⭐ the repository.
