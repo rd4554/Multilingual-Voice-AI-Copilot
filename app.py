@@ -1,11 +1,7 @@
 import streamlit as st
-# import sounddevice as sd
-# from scipy.io.wavfile import write
-# import requests
 from gtts import gTTS
 from groq import Groq
 import tempfile
-# import shutil
 import database 
 import os
 from streamlit_mic_recorder import mic_recorder
@@ -28,6 +24,7 @@ if "last_audio_id" not in st.session_state:
 
 if "latest_audio" not in st.session_state:
     st.session_state.latest_audio = None
+
 # -------------------------
 # DB INIT
 # -------------------------
@@ -35,23 +32,12 @@ if "latest_audio" not in st.session_state:
 database.init_db()
 
 # create first chat if none exist
-
 if len(database.get_chats()) == 0:
     database.create_chat("New Chat")
 
 # -------------------------
-# FFMPEG CHECK
-# -------------------------
-
-# if shutil.which("ffmpeg") is None:
-#     st.error("FFmpeg not found")
-#     st.stop()
-
-#
-
-# -------------------------
 # AUDIO RECORDING
-#
+# -------------------------
 
 def record_audio(filename="input.wav"):
 
@@ -74,22 +60,18 @@ def record_audio(filename="input.wav"):
 
     return filename
 
-    
-
-
-
 # -------------------------
 # GROQ
 # -------------------------
 
-
-
 client = Groq(
     api_key=st.secrets["GROQ_API_KEY"]
 )
+
 # -------------------------
 # STT
 # -------------------------
+
 def speech_to_text(filename="input.wav"):
 
     with open(filename, "rb") as file:
@@ -161,9 +143,6 @@ User message:
 # -------------------------
 
 def generate_audio(text, language):
-
-
-    
 
     if language == "as":
         language = "bn"
@@ -278,7 +257,7 @@ with st.sidebar:
 # HEADER
 # -------------------------
 
-st.title("🎤 Multilingual Voice AI Copilot")
+st.title("🎤 Multilingual Voice Assistant")
 
 # -------------------------
 # LOAD MESSAGES
@@ -390,8 +369,8 @@ Assistant:
         )
     else:
         st.session_state.latest_audio = None
+        
     # Auto title
-
     current_messages = database.get_messages(
         current_chat_id
     )
