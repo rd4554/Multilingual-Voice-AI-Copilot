@@ -1,119 +1,126 @@
 # 🎤 Multilingual Voice AI Copilot
 
-A voice-enabled AI assistant built with Streamlit, Whisper, Ollama, SQLite, and gTTS.
+A powerful Multilingual Voice Assistant built using Streamlit, Groq LLMs, Whisper Speech-to-Text, Google Text-to-Speech, and SQLite.
 
-This application allows users to interact with AI using either voice or text, maintain multiple chat sessions, and receive spoken responses in multiple languages.
+The application allows users to interact with AI using either voice or text, maintain multiple chat sessions, generate AI-powered responses, and optionally receive spoken replies.
 
 ---
 
 ## 🚀 Features
 
 ### 🎙️ Voice Input
-- Record audio directly from the application
-- Speech-to-text transcription using OpenAI Whisper
-- Automatic language detection
+- Record audio directly from the browser.
+- Uses Groq Whisper Large V3 for Speech-to-Text (STT).
+- Automatically transcribes user speech.
 
-### 🤖 AI Conversation
-- Supports multiple Ollama models:
-  - Llama 3
-  - Mistral
-  - Phi-3
-- Context-aware conversations using chat history
-- Maintains conversational memory within each chat session
+### 💬 Text Chat
+- Chat with the AI using text input.
+- Works seamlessly alongside voice interactions.
 
-### 🔊 Text-to-Speech
-- Converts AI responses into speech
-- Multilingual voice output using gTTS
+### 🤖 Multiple AI Models
+Choose from:
 
-### 💬 Chat Management
-- Create new chats
-- Rename existing chats
-- Delete chats
-- Persistent storage using SQLite
+- llama-3.3-70b-versatile
+- llama-3.1-8b-instant
+- gemma2-9b-it
+
+Powered by the Groq API for ultra-fast inference.
+
+### 🧠 Conversation Memory
+- Stores previous messages.
+- Uses chat history as context for future responses.
+
+### 📂 Multi-Chat Management
+- Create new chats.
+- Rename chats.
+- Delete chats.
+- Switch between conversations.
+
+### 🔊 Voice Replies
+- Convert AI responses into speech using Google Text-to-Speech (gTTS).
+- Optional voice response toggle.
+
+### 🏷️ Auto Chat Titles
+- Automatically generates chat titles based on the first user message.
+
+### 💾 Persistent Storage
+- Uses SQLite for storing chats and messages.
+- Data remains available after restarting the application.
 
 ### 🌍 Multilingual Support
-- Voice interaction in multiple languages
-- Automatic language detection and response generation
+Supports multiple languages through Whisper and gTTS, including:
+
+- English
+- Hindi
+- Assamese
+- Bengali
+- Many more
 
 ---
 
-## 🛠️ Tech Stack
+# 🏗️ Tech Stack
 
 | Component | Technology |
 |------------|------------|
 | Frontend | Streamlit |
-| Speech-to-Text | OpenAI Whisper |
-| LLM Backend | Ollama |
-| Database | SQLite |
+| LLM | Groq API |
+| Speech-to-Text | Whisper Large V3 |
 | Text-to-Speech | gTTS |
-| Audio Recording | SoundDevice |
-| Audio Processing | SciPy |
+| Database | SQLite |
+| Voice Recording | streamlit-mic-recorder |
 
 ---
 
-## 📂 Project Structure
+# 📁 Project Structure
 
 ```text
-voice-copilot/
+project/
 │
 ├── app.py
 ├── database.py
+├── chat.db
 ├── requirements.txt
 ├── README.md
-├── .gitignore
 │
-├── screenshots/
-│   ├── home.png
-│   ├── sidebar.png
-│   └── voice-input.png
-│
-└── tests/
-    └── test_ollama.py
+└── .streamlit/
+    └── secrets.toml
 ```
 
 ---
 
-## ⚙️ Prerequisites
+# ⚙️ Installation
 
-Before running the project, install:
+## 1. Clone Repository
 
-- Python 3.10+
-- Ollama
-- FFmpeg
+```bash
+git clone https://github.com/yourusername/voice-ai-copilot.git
+
+cd voice-ai-copilot
+```
 
 ---
 
-## 📦 Installation
-
-Clone the repository:
-
-```bash
-git clone https://github.com/YOUR_USERNAME/multilingual-voice-ai-copilot.git
-
-cd multilingual-voice-ai-copilot
-```
-
-Create a virtual environment:
-
-```bash
-python -m venv venv
-```
-
-Activate it:
+## 2. Create Virtual Environment
 
 ### Windows
 
 ```bash
+python -m venv venv
+
 venv\Scripts\activate
 ```
 
-### Linux / macOS
+### Linux / Mac
 
 ```bash
+python3 -m venv venv
+
 source venv/bin/activate
 ```
 
-Install dependencies:
+---
+
+## 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -121,64 +128,221 @@ pip install -r requirements.txt
 
 ---
 
-## 🤖 Setup Ollama
+# 📦 Requirements
 
-Start Ollama:
+Create a file named `requirements.txt`
 
-```bash
-ollama serve
+```text
+streamlit
+groq
+gtts
+streamlit-mic-recorder
 ```
 
-Pull a model:
+Install:
 
 ```bash
-ollama pull llama3
-```
-
-You may also use:
-
-```bash
-ollama pull mistral
-ollama pull phi3
+pip install -r requirements.txt
 ```
 
 ---
 
-## ▶️ Run the Application
+# 🔑 Configure Groq API Key
+
+Create the following file:
+
+```text
+.streamlit/secrets.toml
+```
+
+Add your API key:
+
+```toml
+GROQ_API_KEY = "your_groq_api_key"
+```
+
+Get your API key from:
+
+https://console.groq.com
+
+---
+
+# ▶️ Running the Application
+
+Start the Streamlit server:
 
 ```bash
 streamlit run app.py
 ```
 
-The application will open in your browser automatically.
+The application will open at:
+
+```text
+http://localhost:8501
+```
 
 ---
 
+# 🗄️ Database Schema
 
-## 🔮 Future Improvements
+## Chats Table
 
-- Browser-based microphone recording
-- Cloud deployment
+```sql
+CREATE TABLE chats(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT
+);
+```
+
+## Messages Table
+
+```sql
+CREATE TABLE messages(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    chat_id INTEGER,
+    role TEXT,
+    content TEXT
+);
+```
+
+---
+
+# 🔄 Application Workflow
+
+```text
+User
+ │
+ ▼
+Voice / Text Input
+ │
+ ▼
+Speech-to-Text (Whisper)
+ │
+ ▼
+Conversation Context Builder
+ │
+ ▼
+Groq LLM
+ │
+ ▼
+AI Response
+ │
+ ├── Save to SQLite
+ │
+ └── Optional Text-to-Speech
+          │
+          ▼
+      Audio Playback
+```
+
+---
+
+# 🎯 Usage Example
+
+### Voice Interaction
+
+1. Click "🎤 Start Recording"
+2. Speak your query
+3. Click "⏹ Stop Recording"
+4. Audio is transcribed
+5. AI generates a response
+6. Optional voice reply is played
+
+---
+
+### Text Interaction
+
+**User**
+
+```text
+Explain blockchain in simple words.
+```
+
+**Assistant**
+
+```text
+Blockchain is a digital ledger that records transactions across many computers. It ensures data is secure, transparent, and cannot be easily modified.
+```
+
+---
+
+# ✨ Sidebar Features
+
+### Chat Management
+- ➕ Create New Chat
+- 💬 Select Existing Chat
+- ✏️ Rename Chat
+- 🗑 Delete Chat
+
+### AI Configuration
+- Select Model
+- Enable/Disable Voice Reply
+
+---
+
+# 🔒 Security Notes
+
+Never commit secrets to GitHub.
+
+Add the following to `.gitignore`
+
+```gitignore
+.streamlit/secrets.toml
+chat.db
+__pycache__/
+*.pyc
+```
+
+---
+
+# 🔮 Future Improvements
+
+- Real-time streaming responses
+- Language auto-detection
 - User authentication
-- Chat export functionality
-- Semantic memory search
-- Integration with online LLM APIs (OpenAI, Gemini, Groq)
+- Export chats as PDF
+- Document-based chat (RAG)
+- Cloud database integration
+- Voice cloning
+- Speech-to-speech conversations
+- Sentiment analysis
+- Conversation summaries
 
 ---
 
-## 🧠 Learning Outcomes
+# 🤝 Contributing
 
-This project demonstrates:
+1. Fork the repository
+2. Create a feature branch
 
-- Speech Recognition
-- Generative AI Integration
-- Prompt Engineering
-- Database Management
-- Streamlit Application Development
-- Multilingual AI Systems
-- Voice User Interfaces
+```bash
+git checkout -b feature-name
+```
+
+3. Commit changes
+
+```bash
+git commit -m "Add feature"
+```
+
+4. Push changes
+
+```bash
+git push origin feature-name
+```
+
+5. Open a Pull Request
 
 ---
 
-## 👨‍💻 Reecha
+# 📄 License
 
+This project is licensed under the MIT License.
+
+---
+
+# 👨‍💻Reecha
+
+**Arpan**
+
+Built with ❤️ using Streamlit, Groq, Whisper, SQLite, and Google Text-to-Speech.
