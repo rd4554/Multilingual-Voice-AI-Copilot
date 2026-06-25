@@ -22,8 +22,8 @@ st.set_page_config(
     page_icon="🎤",
     layout="wide"
 )
-if "latest_audio" not in st.session_state:
-    st.session_state.latest_audio = None
+# if "latest_audio" not in st.session_state:
+#     st.session_state.latest_audio = None
 
 if "last_audio_id" not in st.session_state:
     st.session_state.last_audio_id = None
@@ -286,8 +286,7 @@ for role, content in messages:
     with st.chat_message(role):
         st.write(content)
 
-if st.session_state.latest_audio:
-    st.audio(st.session_state.latest_audio)
+
 
 # -------------------------
 # SPEAK BUTTON
@@ -379,11 +378,12 @@ Assistant:
 
     # Generate audio
 
-    st.session_state.latest_audio = generate_audio(
+    audio_path = generate_audio(
         answer,
         language
     )
-
+    st.audio(audio_path)
+    
     # Auto title
 
     current_messages = database.get_messages(
