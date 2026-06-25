@@ -13,6 +13,7 @@ chat.db
 # Audio files
 *.wav
 *.mp3
+input.wav
 
 # Environment variables
 .env
