@@ -1,14 +1,14 @@
 import streamlit as st
-import whisper
-import sounddevice as sd
-from scipy.io.wavfile import write
-import requests
+# import sounddevice as sd
+# from scipy.io.wavfile import write
+# import requests
 from gtts import gTTS
 from groq import Groq
 import tempfile
-import shutil
+# import shutil
 import database 
 import os
+from streamlit_mic_recorder import mic_recorder
 
 print(dir(database))
 print("DB PATH:", os.path.abspath(database.DB_NAME))
@@ -24,6 +24,9 @@ st.set_page_config(
 )
 if "latest_audio" not in st.session_state:
     st.session_state.latest_audio = None
+
+if "last_audio_id" not in st.session_state:
+    st.session_state.last_audio_id = None
 # -------------------------
 # DB INIT
 # -------------------------
@@ -39,52 +42,43 @@ if len(database.get_chats()) == 0:
 # FFMPEG CHECK
 # -------------------------
 
-if shutil.which("ffmpeg") is None:
-    st.error("FFmpeg not found")
-    st.stop()
+# if shutil.which("ffmpeg") is None:
+#     st.error("FFmpeg not found")
+#     st.stop()
 
-# -------------------------
-# WHISPER
-# -------------------------
-
-@st.cache_resource
-def load_model():
-    return whisper.load_model("base")
-
-MODEL = load_model()
+#
 
 # -------------------------
 # AUDIO RECORDING
-# -------------------------
+#
 
-def record_audio(
-        filename="input.wav",
-        duration=5,
-        fs=44100):
+def record_audio(filename="input.wav"):
 
-    recording = sd.rec(
-        int(duration * fs),
-        samplerate=fs,
-        channels=1,
-        dtype="int16"
+    audio = mic_recorder(
+        start_prompt="🎤 Start Recording",
+        stop_prompt="⏹ Stop Recording",
+        key="mic"
     )
 
-    sd.wait()
+    if not audio:
+        return None
+    
+    audio_id = hash(audio["bytes"])
+    if audio_id == st.session_state.last_audio_id:
+        return None
+    st.session_state.last_audio_id = audio_id
 
-    write(filename, fs, recording)
+    with open(filename, "wb") as f:
+        f.write(audio["bytes"])
+
+    return filename
+
+    
+
+
 
 # -------------------------
-# STT
-# -------------------------
-
-def speech_to_text(filename="input.wav"):
-
-    result = MODEL.transcribe(filename)
-
-    return result["text"], result["language"]
-
-# -------------------------
-# OLLAMA GROQ
+# GROQ
 # -------------------------
 
 
@@ -92,6 +86,20 @@ def speech_to_text(filename="input.wav"):
 client = Groq(
     api_key=st.secrets["GROQ_API_KEY"]
 )
+# -------------------------
+# STT
+# -------------------------
+def speech_to_text(filename="input.wav"):
+
+    with open(filename, "rb") as file:
+
+        transcription = client.audio.transcriptions.create(
+            file=file,
+            model="whisper-large-v3"
+        )
+
+    return transcription.text, "en"
+
 
 def ask_llama(prompt, model_name):
 
@@ -108,35 +116,35 @@ def ask_llama(prompt, model_name):
 
     return response.choices[0].message.content
 
+
 def generate_chat_title(user_text, model_name):
 
     prompt = f"""
-    Create a short title for this conversation.
+Create a short title for this conversation.
 
-    Rules:
-    - Maximum 5 words
-    - No quotation marks
-    - Return only the title
+Rules:
+- Maximum 5 words
+- No quotation marks
+- Return only the title
 
-    User message:
-    {user_text}
-    """
+User message:
+{user_text}
+"""
 
     try:
 
-        response = requests.post(
-            "http://127.0.0.1:11434/api/generate",
-            json={
-                "model": model_name,
-                "prompt": prompt,
-                "stream": False
-            },
-            timeout=60
+        response = client.chat.completions.create(
+            model=model_name,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            temperature=0
         )
 
-        response.raise_for_status()
-
-        title = response.json()["response"]
+        title = response.choices[0].message.content
 
         title = title.replace('"', "")
         title = title.replace("\n", "")
@@ -144,6 +152,7 @@ def generate_chat_title(user_text, model_name):
         return title[:50]
 
     except:
+
         return "New Chat"
 
 # -------------------------
@@ -234,12 +243,7 @@ with st.sidebar:
 
     st.divider()
 
-    duration = st.slider(
-        "Recording Duration",
-        3,
-        15,
-        5
-    )
+    
 
     model_name = st.selectbox(
     "Model",
@@ -282,25 +286,24 @@ for role, content in messages:
     with st.chat_message(role):
         st.write(content)
 
+if st.session_state.latest_audio:
+    st.audio(st.session_state.latest_audio)
+
 # -------------------------
 # SPEAK BUTTON
 # -------------------------
 
-record = st.button(
-    "🎤 Speak",
-    use_container_width=True
-)
+audio_file = record_audio()
+
 text_input = st.chat_input(
     "Type your message..."
 )
 
-if record:
-
-    with st.spinner("🎤 Listening..."):
-        record_audio(duration=duration)
+if audio_file:
 
     with st.spinner("🧠 Transcribing..."):
-        user_text, language = speech_to_text()
+
+        user_text, language = speech_to_text(audio_file)
 
     st.info(f"🎙️ Detected: {user_text}")
 
@@ -310,7 +313,10 @@ elif text_input:
     language = "en"
 
 else:
+
     user_text = None
+
+
 
 if user_text:
 
@@ -368,6 +374,8 @@ Assistant:
         "assistant",
         answer
     )
+    with st.chat_message("assistant"):
+      st.write(answer)
 
     # Generate audio
 
