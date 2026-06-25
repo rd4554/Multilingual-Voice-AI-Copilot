@@ -358,8 +358,8 @@ This project is licensed under the MIT License.
 
 ---
 
-# 👨‍💻Reecha
+# 👨‍💻
 
-**Arpan**
+**Reecha**
 
-Built with ❤️ using Streamlit, Groq, Whisper, SQLite, and Google Text-to-Speech.
+
