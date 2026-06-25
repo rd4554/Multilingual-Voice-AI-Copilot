@@ -182,7 +182,24 @@ http://localhost:8501
 ```
 
 ---
+## 🌐 Live Demo
 
+Try the deployed application here:
+
+🔗 https://multilingual-voice-ai-copilot-rd.streamlit.app/
+
+### Features Available on Live Demo
+
+- 🎤 Voice Recording
+- 💬 Text Chat
+- 🤖 Multiple AI Models
+- 🧠 Conversation Memory
+- 📂 Multi-Chat Management
+- 🔊 Voice Responses
+- 🏷️ Auto Chat Title Generation
+- 🌍 Multilingual Support
+
+No installation required — simply open the link and start chatting.
 # 🗄️ Database Schema
 
 ## Chats Table
