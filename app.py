@@ -22,11 +22,12 @@ st.set_page_config(
     page_icon="🎤",
     layout="wide"
 )
-# if "latest_audio" not in st.session_state:
-#     st.session_state.latest_audio = None
 
 if "last_audio_id" not in st.session_state:
     st.session_state.last_audio_id = None
+
+if "latest_audio" not in st.session_state:
+    st.session_state.latest_audio = None
 # -------------------------
 # DB INIT
 # -------------------------
@@ -218,6 +219,10 @@ with st.sidebar:
         for chat_id, title in chats
         if title == selected_chat
     )
+    voice_reply = st.toggle(
+    "🔊 Voice Reply",
+    value=False
+    )
 
     st.divider()
 
@@ -253,6 +258,8 @@ with st.sidebar:
         "gemma2-9b-it"
     ]
 )
+    
+
     if st.button(
     "🗑 Delete Current Chat",
     use_container_width=True
@@ -285,7 +292,8 @@ for role, content in messages:
 
     with st.chat_message(role):
         st.write(content)
-
+if st.session_state.latest_audio:
+    st.audio(st.session_state.latest_audio)
 
 
 # -------------------------
@@ -373,17 +381,15 @@ Assistant:
         "assistant",
         answer
     )
-    with st.chat_message("assistant"):
-      st.write(answer)
-
     # Generate audio
-
-    audio_path = generate_audio(
-        answer,
-        language
-    )
-    st.audio(audio_path)
     
+    if voice_reply:
+        st.session_state.latest_audio = generate_audio(
+           answer,
+           language
+        )
+    else:
+        st.session_state.latest_audio = None
     # Auto title
 
     current_messages = database.get_messages(
