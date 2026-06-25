@@ -4,6 +4,7 @@ import sounddevice as sd
 from scipy.io.wavfile import write
 import requests
 from gtts import gTTS
+from groq import Groq
 import tempfile
 import shutil
 import database 
@@ -83,21 +84,29 @@ def speech_to_text(filename="input.wav"):
     return result["text"], result["language"]
 
 # -------------------------
-# OLLAMA
+# OLLAMA GROQ
 # -------------------------
+
+
+
+client = Groq(
+    api_key=st.secrets["GROQ_API_KEY"]
+)
 
 def ask_llama(prompt, model_name):
 
-    response = requests.post(
-        "http://127.0.0.1:11434/api/generate",
-        json={
-            "model": model_name,
-            "prompt": prompt,
-            "stream": False
-        }
+    response = client.chat.completions.create(
+        model=model_name,
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        temperature=0.7
     )
 
-    return response.json()["response"]
+    return response.choices[0].message.content
 
 def generate_chat_title(user_text, model_name):
 
@@ -235,9 +244,9 @@ with st.sidebar:
     model_name = st.selectbox(
     "Model",
     [
-        "llama3",
-        "mistral",
-        "phi3"
+        "llama-3.3-70b-versatile",
+        "llama-3.1-8b-instant",
+        "gemma2-9b-it"
     ]
 )
     if st.button(
